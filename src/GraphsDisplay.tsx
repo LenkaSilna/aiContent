@@ -11,27 +11,31 @@ interface GraphsDisplayProps {
 	data: {[category: string]: CategoryData}
 }
 
-const DoughnutChart: React.FC<{data: any[]}> = ({data}) => (
-	<PieChart width={300} height={300} style={{pointerEvents: 'none'}}>
-		<Pie
-			dataKey="value"
-			startAngle={90}
-			endAngle={-270}
-			data={data}
-			cx={150}
-			cy={150}
-			innerRadius={45}
-			outerRadius={70}
-			fill="#8884d8"
-			paddingAngle={5}
-			label={(props) => customizedLabel({...props, data})}
-		>
-			{data.map((entry, index) => (
-				<Cell key={`cell-${index}`} fill={entry.color} />
-			))}
-		</Pie>
-	</PieChart>
-)
+const DoughnutChart: React.FC<{ data: any[]; labelType: 'percent' | 'count' }> = ({ data, labelType }) => {
+    return (
+        <PieChart width={300} height={300} style={{ pointerEvents: 'none' }}>
+            <Pie
+                dataKey="value"
+                startAngle={90}
+                endAngle={-270}
+                data={data}
+                cx={150}
+                cy={150}
+                innerRadius={45}
+                outerRadius={70}
+                fill="#8884d8"
+                paddingAngle={5}
+                label={(props) => customizedLabel({ ...props, data, labelType })}
+                labelLine={false}
+            >
+                {data.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                ))}
+            </Pie>
+        </PieChart>
+    );
+};
+
 
 const customizedLabel = ({
 	cx,
@@ -39,9 +43,10 @@ const customizedLabel = ({
 	midAngle,
 	innerRadius,
 	outerRadius,
-	percent,
 	index,
+    percent,
 	data,
+    labelType,
 }: {
 	cx: number
 	cy: number
@@ -51,11 +56,23 @@ const customizedLabel = ({
 	percent: number
 	index: number
 	data: any[]
+    labelType: 'percent' | 'count'
 }) => {
-	const radius = innerRadius + (outerRadius - innerRadius) * 2.1
-	const x = cx + radius * Math.cos((-midAngle * Math.PI) / 180)
-	const y = cy + radius * Math.sin((-midAngle * Math.PI) / 180)
-	const color = data[index].color
+    if (labelType === 'percent' && data[index].name === 'Zbývající') {
+        return null;
+    }
+
+    const radius = innerRadius + (outerRadius - innerRadius) * 1.6
+    const x = cx + radius * Math.cos((-midAngle * Math.PI) / 180)
+    const y = cy + radius * Math.sin((-midAngle * Math.PI) / 180)
+    const color = data[index].color
+
+    let labelContent;
+    if (labelType === 'percent') {
+        labelContent = `${(percent * 100).toFixed(0)}%`;
+    } else {
+        labelContent = `${data[index].value}`;
+    }
 
 	return (
 		<text
@@ -65,8 +82,9 @@ const customizedLabel = ({
 			fill={color}
 			textAnchor={x > cx ? 'start' : 'end'}
 			dominantBaseline="central"
+            style={{ fontWeight: 'bold' }}
 		>
-			{`${(percent * 100).toFixed(0)}%`}
+			{labelContent}
 		</text>
 	)
 }
@@ -90,46 +108,35 @@ const GraphsDisplay: React.FC<GraphsDisplayProps> = ({data}) => {
 			name: 'Zbývající',
 			value: remainingRate,
 			color: '#7f7f7f',
-			opacity: 0.5,
+			opacity: 0.3,
 			stroke: '#7f7f7f',
 		},
 	]
 
-	const totalRatings = ratings.length
-	const totalMaxScore = totalRatings * 10
+    const categoryCounts: { [key: string]: number } = {
+        'Vysoké Hodnocení': 0,
+        'Střední Hodnocení': 0,
+        'Nízké Hodnocení': 0,
+      };
 
-	const highScore = ratings
-		.filter((r) => r >= 7)
-		.reduce((acc, r) => acc + r, 0)
-	const mediumScore = ratings
-		.filter((r) => r >= 4 && r < 7)
-		.reduce((acc, r) => acc + r, 0)
-	const lowScore = ratings.filter((r) => r < 4).reduce((acc, r) => acc + r, 0)
-
-	const highPercent = (highScore / totalMaxScore) * 100
-	const mediumPercent = (mediumScore / totalMaxScore) * 100
-	const lowPercent = (lowScore / totalMaxScore) * 100
-
-	const categoryData = [
-		{
-			name: 'Vysoké Hodnocení',
-			value: highPercent,
-			color: '#4caf50',
-			stroke: '#4caf50',
-		},
-		{
-			name: 'Střední Hodnocení',
-			value: mediumPercent,
-			color: '#9c27b0',
-			stroke: '#9c27b0',
-		},
-		{
-			name: 'Nízké Hodnocení',
-			value: lowPercent,
-			color: '#f44336',
-			stroke: '#f44336',
-		},
-	]
+      ratings.forEach((r) => {
+        if (r >= 7) categoryCounts['Vysoké Hodnocení'] += 1;
+        else if (r >= 4) categoryCounts['Střední Hodnocení'] += 1;
+        else categoryCounts['Nízké Hodnocení'] += 1;
+      });
+    
+      Object.keys(categoryCounts).forEach((key) => {
+        if (categoryCounts[key] > 11) {
+          categoryCounts[key] = 11;
+        }
+      });
+    
+      const categoryData = Object.keys(categoryCounts).map((key) => ({
+        name: categoryCounts[key],
+        value: categoryCounts[key],
+        color: key === 'Vysoké Hodnocení' ? '#4caf50' : key === 'Střední Hodnocení' ? '#9c27b0' : '#f44336',
+        stroke: key === 'Vysoké Hodnocení' ? '#4caf50' : key === 'Střední Hodnocení' ? '#9c27b0' : '#f44336',
+      }));
 
 	return (
 		<Card
@@ -150,13 +157,16 @@ const GraphsDisplay: React.FC<GraphsDisplayProps> = ({data}) => {
 						<Typography>
 							Celkové hodnocení titulku
 						</Typography>
-						<DoughnutChart data={overallData} />
+						<DoughnutChart labelType='percent' data={overallData} />
+                        <Typography>
+                            {`${total} Bodů`}
+						</Typography>
 					</Box>
 					<Box>
 						<Typography>
 							Rozložení hodnocení
 						</Typography>
-						<DoughnutChart data={categoryData} />
+						<DoughnutChart labelType='count' data={categoryData} />
 					</Box>
 				</Box>
 			</CardContent>
