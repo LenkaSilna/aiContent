@@ -77,7 +77,7 @@ const GraphsDisplay: React.FC<GraphsDisplayProps> = ({data}) => {
 		.filter((h) => !isNaN(h) && h != null)
 
 	const total = ratings.reduce((a, b) => a + b, 0)
-	const remainingRate = 100 - total
+	const remainingRate = 110 - total
 
 	const overallData = [
 		{
@@ -105,12 +105,10 @@ const GraphsDisplay: React.FC<GraphsDisplayProps> = ({data}) => {
 		.filter((r) => r >= 4 && r < 7)
 		.reduce((acc, r) => acc + r, 0)
 	const lowScore = ratings.filter((r) => r < 4).reduce((acc, r) => acc + r, 0)
-	const totalScore = highScore + mediumScore + lowScore
 
 	const highPercent = (highScore / totalMaxScore) * 100
 	const mediumPercent = (mediumScore / totalMaxScore) * 100
 	const lowPercent = (lowScore / totalMaxScore) * 100
-	const remainingPercent = 100 - totalScore
 
 	const categoryData = [
 		{
@@ -130,13 +128,6 @@ const GraphsDisplay: React.FC<GraphsDisplayProps> = ({data}) => {
 			value: lowPercent,
 			color: '#f44336',
 			stroke: '#f44336',
-		},
-		{
-			name: 'Zbývající',
-			value: remainingPercent,
-			color: '#7f7f7f',
-			opacity: 0.5,
-			stroke: '#7f7f7f',
 		},
 	]
 
