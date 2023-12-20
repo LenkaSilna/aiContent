@@ -11,6 +11,7 @@ import {
 } from '@mui/material'
 import TitlesDisplay from './TitlesDisplay'
 import MetricsDisplay from './MetricsDisplay'
+import GraphsDisplay from './GraphsDisplay'
 
 const Dashboard: React.FC = () => {
 	const [text, setText] = useState<string>('')
@@ -40,7 +41,7 @@ const Dashboard: React.FC = () => {
 		<Box>
 			<form onSubmit={handleSubmit}>
 				<Typography variant="h4" component="h2" gutterBottom>
-					Ai Content
+					AI Content Analyze
 				</Typography>
 				<Grid container spacing={2} alignItems="center">
 					<Grid item xs={12} sm={10}>
@@ -86,7 +87,11 @@ const Dashboard: React.FC = () => {
 			{metricsLoading ? (
 				<CircularProgress />
 			) : metrics ? (
-				<MetricsDisplay data={metrics} />
+				<>
+					<GraphsDisplay data={metrics} />
+					<Divider sx={{my: 2, borderColor: 'white'}} />
+					<MetricsDisplay data={metrics} />
+				</>
 			) : (
 				<div>No Metrics Available</div>
 			)}

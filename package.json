@@ -16,11 +16,13 @@
 		"@mui/icons-material": "^5.15.1",
 		"@mui/material": "^5.15.1",
 		"@mui/styled-engine-sc": "6.0.0-alpha.9",
+		"@mui/x-charts": "^6.18.3",
 		"eslint-config-prettier": "^9.1.0",
 		"eslint-plugin-prettier": "^5.0.1",
 		"prettier": "^3.1.1",
 		"react": "^18.2.0",
 		"react-dom": "^18.2.0",
+		"recharts": "^2.10.3",
 		"styled-components": "^6.1.1"
 	},
 	"devDependencies": {
