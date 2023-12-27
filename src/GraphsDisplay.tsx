@@ -11,31 +11,33 @@ interface GraphsDisplayProps {
 	data: {[category: string]: CategoryData}
 }
 
-const DoughnutChart: React.FC<{ data: any[]; labelType: 'percent' | 'count' }> = ({ data, labelType }) => {
-    return (
-        <PieChart width={300} height={300} style={{ pointerEvents: 'none' }}>
-            <Pie
-                dataKey="value"
-                startAngle={90}
-                endAngle={-270}
-                data={data}
-                cx={150}
-                cy={150}
-                innerRadius={45}
-                outerRadius={70}
-                fill="#8884d8"
-                paddingAngle={5}
-                label={(props) => customizedLabel({ ...props, data, labelType })}
-                labelLine={false}
-            >
-                {data.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                ))}
-            </Pie>
-        </PieChart>
-    );
-};
-
+const DoughnutChart: React.FC<{
+	data: any[]
+	labelType: 'percent' | 'count'
+}> = ({data, labelType}) => {
+	return (
+		<PieChart width={300} height={300} style={{pointerEvents: 'none'}}>
+			<Pie
+				dataKey="value"
+				startAngle={90}
+				endAngle={-270}
+				data={data}
+				cx={150}
+				cy={150}
+				innerRadius={45}
+				outerRadius={70}
+				fill="#8884d8"
+				paddingAngle={5}
+				label={(props) => customizedLabel({...props, data, labelType})}
+				labelLine={false}
+			>
+				{data.map((entry, index) => (
+					<Cell key={`cell-${index}`} fill={entry.color} />
+				))}
+			</Pie>
+		</PieChart>
+	)
+}
 
 const customizedLabel = ({
 	cx,
@@ -44,9 +46,9 @@ const customizedLabel = ({
 	innerRadius,
 	outerRadius,
 	index,
-    percent,
+	percent,
 	data,
-    labelType,
+	labelType,
 }: {
 	cx: number
 	cy: number
@@ -56,23 +58,23 @@ const customizedLabel = ({
 	percent: number
 	index: number
 	data: any[]
-    labelType: 'percent' | 'count'
+	labelType: 'percent' | 'count'
 }) => {
-    if (labelType === 'percent' && data[index].name === 'Zbývající') {
-        return null;
-    }
+	if (labelType === 'percent' && data[index].name === 'Zbývající') {
+		return null
+	}
 
-    const radius = innerRadius + (outerRadius - innerRadius) * 1.6
-    const x = cx + radius * Math.cos((-midAngle * Math.PI) / 180)
-    const y = cy + radius * Math.sin((-midAngle * Math.PI) / 180)
-    const color = data[index].color
+	const radius = innerRadius + (outerRadius - innerRadius) * 1.6
+	const x = cx + radius * Math.cos((-midAngle * Math.PI) / 180)
+	const y = cy + radius * Math.sin((-midAngle * Math.PI) / 180)
+	const color = data[index].color
 
-    let labelContent;
-    if (labelType === 'percent') {
-        labelContent = `${(percent * 100).toFixed(0)}%`;
-    } else {
-        labelContent = `${data[index].value}`;
-    }
+	let labelContent
+	if (labelType === 'percent') {
+		labelContent = `${(percent * 100).toFixed(0)}%`
+	} else {
+		labelContent = `${data[index].value}`
+	}
 
 	return (
 		<text
@@ -82,7 +84,7 @@ const customizedLabel = ({
 			fill={color}
 			textAnchor={x > cx ? 'start' : 'end'}
 			dominantBaseline="central"
-            style={{ fontWeight: 'bold' }}
+			style={{fontWeight: 'bold'}}
 		>
 			{labelContent}
 		</text>
@@ -113,30 +115,40 @@ const GraphsDisplay: React.FC<GraphsDisplayProps> = ({data}) => {
 		},
 	]
 
-    const categoryCounts: { [key: string]: number } = {
-        'Vysoké Hodnocení': 0,
-        'Střední Hodnocení': 0,
-        'Nízké Hodnocení': 0,
-      };
+	const categoryCounts: {[key: string]: number} = {
+		'Vysoké Hodnocení': 0,
+		'Střední Hodnocení': 0,
+		'Nízké Hodnocení': 0,
+	}
 
-      ratings.forEach((r) => {
-        if (r >= 7) categoryCounts['Vysoké Hodnocení'] += 1;
-        else if (r >= 4) categoryCounts['Střední Hodnocení'] += 1;
-        else categoryCounts['Nízké Hodnocení'] += 1;
-      });
-    
-      Object.keys(categoryCounts).forEach((key) => {
-        if (categoryCounts[key] > 11) {
-          categoryCounts[key] = 11;
-        }
-      });
-    
-      const categoryData = Object.keys(categoryCounts).map((key) => ({
-        name: categoryCounts[key],
-        value: categoryCounts[key],
-        color: key === 'Vysoké Hodnocení' ? '#4caf50' : key === 'Střední Hodnocení' ? '#9c27b0' : '#f44336',
-        stroke: key === 'Vysoké Hodnocení' ? '#4caf50' : key === 'Střední Hodnocení' ? '#9c27b0' : '#f44336',
-      }));
+	ratings.forEach((r) => {
+		if (r >= 7) categoryCounts['Vysoké Hodnocení'] += 1
+		else if (r >= 4) categoryCounts['Střední Hodnocení'] += 1
+		else categoryCounts['Nízké Hodnocení'] += 1
+	})
+
+	Object.keys(categoryCounts).forEach((key) => {
+		if (categoryCounts[key] > 11) {
+			categoryCounts[key] = 11
+		}
+	})
+
+	const categoryData = Object.keys(categoryCounts).map((key) => ({
+		name: categoryCounts[key],
+		value: categoryCounts[key],
+		color:
+			key === 'Vysoké Hodnocení'
+				? '#4caf50'
+				: key === 'Střední Hodnocení'
+					? '#9c27b0'
+					: '#f44336',
+		stroke:
+			key === 'Vysoké Hodnocení'
+				? '#4caf50'
+				: key === 'Střední Hodnocení'
+					? '#9c27b0'
+					: '#f44336',
+	}))
 
 	return (
 		<Card
@@ -151,22 +163,35 @@ const GraphsDisplay: React.FC<GraphsDisplayProps> = ({data}) => {
 					style={{
 						display: 'flex',
 						justifyContent: 'space-around',
+						alignItems: 'stretch', // Přidáno pro zarovnání prvků
 					}}
 				>
-					<Box>
+					<Box
+						style={{
+							display: 'flex',
+							flexDirection: 'column',
+							justifyContent: 'space-between',
+						}}
+					>
 						<Typography>
-							Celkové hodnocení titulku
+							Celkové hodnocení titulku <br />
+							<span
+								style={{color: '#8884d8', fontWeight: 'bold'}}
+							>
+								{`${total} Bodů`}
+							</span>
 						</Typography>
-						<DoughnutChart labelType='percent' data={overallData} />
-                        <Typography>
-                            {`${total} Bodů`}
-						</Typography>
+						<DoughnutChart labelType="percent" data={overallData} />
 					</Box>
-					<Box>
-						<Typography>
-							Rozložení hodnocení
-						</Typography>
-						<DoughnutChart labelType='count' data={categoryData} />
+					<Box
+						style={{
+							display: 'flex',
+							flexDirection: 'column',
+							justifyContent: 'space-between',
+						}}
+					>
+						<Typography>Rozložení hodnocení</Typography>
+						<DoughnutChart labelType="count" data={categoryData} />
 					</Box>
 				</Box>
 			</CardContent>

@@ -2,6 +2,7 @@ import React, {createContext, useState, ReactNode} from 'react'
 
 interface IData {
 	'title': string
+	'temperature'?: number
 }
 
 interface IApiResponseTitle {
@@ -43,7 +44,6 @@ export const ApiProvider: React.FC<ApiProviderProps> = ({children}) => {
 		const requestData = {
 			...data,
 			model: 'gpt-4-1106-preview',
-			temperature: 0.8,
 		}
 
 		try {
